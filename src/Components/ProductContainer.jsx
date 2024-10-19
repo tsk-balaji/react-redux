@@ -1,21 +1,15 @@
 import PropTypes from "prop-types";
 import { useState, useEffect, useContext } from "react";
-import { jsonData } from "../App.jsx";
+import { jsonData, SubtotalContext } from "../App.jsx"; // Import SubtotalContext
 
 export default function ProductsContainer() {
-  //Context API Consumer imported from the App.jsx components
   const products = useContext(jsonData);
 
-  const [quantities, setQuantities] = useState();
-  const [subtotals, setSubtotals] = useState([]);
+  // Destructure both subtotals and setSubtotals from SubtotalContext
+  const { setSubtotals } = useContext(SubtotalContext);
 
-  // Initialize quantities when products change
-  useEffect(() => {
-    const initialQuantities = products.map(() => 1); // Set default quantity to 1
-    const initialSubtotals = products.map((product) => product.price); // Initial subtotals based on price
-    setQuantities(initialQuantities);
-    setSubtotals(initialSubtotals);
-  }, [products]);
+  const [quantities, setQuantities] = useState([]);
+  const [localSubtotals, setLocalSubtotals] = useState([]);
 
   // Render Ratings
   function renderRatings(rating = 0) {
@@ -26,17 +20,30 @@ export default function ProductsContainer() {
     return ratingsNode;
   }
 
+  // Initialize quantities and subtotals when products change
+  useEffect(() => {
+    const initialQuantities = products.map(() => 1); // Default quantity to 1
+    const initialSubtotals = products.map((product) => product.price); // Subtotal based on price
+    setQuantities(initialQuantities);
+    setLocalSubtotals(initialSubtotals);
+    setSubtotals(initialSubtotals); // Update global subtotals context
+  }, [products, setSubtotals]);
+
   // Handle quantity change
   const handleQuantityChange = (index, value) => {
     const updatedQuantities = [...quantities];
-    updatedQuantities[index] = parseInt(value); // Update the quantity for the specific product
+    const newQuantity = parseInt(value); // Ensure the value is an integer
+    updatedQuantities[index] = newQuantity;
     setQuantities(updatedQuantities);
 
     // Update the subtotal for this product
-    const newQuantity = parseInt(value); //parseInt to ensure the value is Int
-    const updatedSubtotals = [...subtotals];
-    updatedSubtotals[index] = newQuantity * products[index].price; // Recalculate the subtotal
-    setSubtotals(updatedSubtotals);
+    const updatedSubtotals = products.map((product, i) =>
+      i === index
+        ? newQuantity * product.price
+        : updatedQuantities[i] * product.price
+    );
+    setLocalSubtotals(updatedSubtotals);
+    setSubtotals(updatedSubtotals); // Update global subtotals context
   };
 
   // Handle delete button click
@@ -45,9 +52,10 @@ export default function ProductsContainer() {
     updatedQuantities[index] = 0; // Set the quantity to 0 for the specific product
     setQuantities(updatedQuantities);
 
-    const updatedSubtotals = [...subtotals];
+    const updatedSubtotals = [...localSubtotals];
     updatedSubtotals[index] = 0; // Set subtotal to 0 as well
-    setSubtotals(updatedSubtotals);
+    setLocalSubtotals(updatedSubtotals);
+    setSubtotals(updatedSubtotals); // Update global subtotals context
   };
 
   return (
@@ -94,7 +102,7 @@ export default function ProductsContainer() {
                     <div style={{ textAlign: "left", marginBottom: "20px" }}>
                       <h6 style={{ fontSize: "1.5em" }}>{data.title}</h6>
                       <p style={{ fontSize: ".85em" }}>{data.description}</p>
-                      <p style={{ color: "green" }}>In stock </p>
+                      <p style={{ color: "green" }}>In stock</p>
                     </div>
                   </div>
 
@@ -124,7 +132,6 @@ export default function ProductsContainer() {
                     <select
                       id="quantity"
                       name="quantity"
-                      defaultValue={1}
                       value={quantities[index]}
                       style={{ marginLeft: "10px", padding: "5px" }}
                       onChange={(e) =>
@@ -177,7 +184,6 @@ export default function ProductsContainer() {
             </div>
           ))}
         </div>
-        <div>{subtotals}</div>
       </div>
     </section>
   );

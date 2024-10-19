@@ -2,7 +2,6 @@
 import { useLayoutEffect, useState, createContext } from "react";
 import "./App.css";
 import ProductContainer from "./Components/ProductContainer";
-import Subtotal from "./Components/Subtotal";
 import Total from "./Components/Total";
 
 //Context API to pass the fetched json Data
@@ -13,6 +12,7 @@ export const SubtotalContext = createContext();
 
 export default function App() {
   const [products, setProducts] = useState([]);
+  const [subtotals, setSubtotals] = useState([]);
 
   useLayoutEffect(() => {
     fetch("/products.json")
@@ -23,16 +23,15 @@ export default function App() {
         }
       })
       .catch((error) => console.log(error));
-    return () => {};
   }, []);
 
   return (
-    <>
-      <jsonData.Provider value={products}>
+    <jsonData.Provider value={products}>
+      {/* Provide both subtotals and setSubtotals as part of the SubtotalContext */}
+      <SubtotalContext.Provider value={{ subtotals, setSubtotals }}>
         <ProductContainer />
-      </jsonData.Provider>
-      <Subtotal />
-      <Total />
-    </>
+        <Total />
+      </SubtotalContext.Provider>
+    </jsonData.Provider>
   );
 }
