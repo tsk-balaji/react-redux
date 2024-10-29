@@ -1,14 +1,18 @@
+// src/redux/reducers/products.reducers.js
 import { createSlice } from "@reduxjs/toolkit";
 
-export const jsonDataSlice = createSlice({
-  name: "jsonData",
+export const productsSlice = createSlice({
+  name: "products",
   initialState: { isLoading: false, products: [] },
   reducers: {
-    jsonData: (state, action) => {
-      console.log(state, action);
+    jsonSetProductsData: (state, action) => {
+      return { ...state, products: action.payload.products }; // Set the products with the fetched data
     },
   },
 });
 
-export const { jsonData } = jsonDataSlice.actions;
-export default jsonDataSlice.reducer;
+// Action creator export
+export const { jsonSetProductsData } = productsSlice.actions;
+
+// Reducer export
+export default productsSlice.reducer;

@@ -1,37 +1,26 @@
-/* eslint-disable react-refresh/only-export-components */
-import { useLayoutEffect, useState, createContext } from "react";
+import { useEffect } from "react";
 import "./App.css";
 import ProductContainer from "./Components/ProductContainer";
 import Total from "./Components/Total";
-
-//Context API to pass the fetched json Data
-export const jsonData = createContext();
-
-// Create the SubtotalContext
-export const SubtotalContext = createContext();
+import { useDispatch } from "react-redux";
+import { jsonSetProductsData } from "./redux/reducers/products.reducers";
 
 export default function App() {
-  const [products, setProducts] = useState([]);
-  const [subtotals, setSubtotals] = useState([]);
+  const dispatcher = useDispatch();
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     fetch("/products.json")
       .then((response) => response.json())
       .then((result) => {
-        if (result.products.length > 0) {
-          setProducts(result.products);
-        }
+        dispatcher(jsonSetProductsData(result));
       })
       .catch((error) => console.log(error));
-  }, []);
+  }, []); // Adding [] to run this effect only once on mount
 
   return (
-    <jsonData.Provider value={products}>
-      {/* Provide both subtotals and setSubtotals as part of the SubtotalContext */}
-      <SubtotalContext.Provider value={{ subtotals, setSubtotals }}>
-        <ProductContainer />
-        <Total />
-      </SubtotalContext.Provider>
-    </jsonData.Provider>
+    <>
+      <ProductContainer />
+      <Total />
+    </>
   );
 }
