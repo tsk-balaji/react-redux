@@ -1,10 +1,11 @@
-import { useSelector } from "react-redux";
+import { useContext } from "react";
+import { SubtotalContext } from "../App.jsx"; // Import SubtotalContext
 
 export default function Total() {
-  const subTotals = useSelector((store) => store.subTotal);
+  const { subtotals } = useContext(SubtotalContext); // Destructure subtotals from the context
 
   // Calculate the total subtotal
-  const totalSubtotal = subTotals.reduce((acc, subtotal) => acc + subtotal, 0);
+  const totalSubtotal = subtotals.reduce((acc, subtotal) => acc + subtotal, 0);
 
   const handleCheckout = () => {
     alert("Redirecting to Bank's Site");
@@ -16,6 +17,7 @@ export default function Total() {
         <h5 style={{ textAlign: "left" }}>Subtotal of all items:</h5>
         <h5 style={{ textAlign: "right" }}>₹ {totalSubtotal.toFixed(2)}</h5>
       </div>
+
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <h6 style={{ textAlign: "left" }}>Shipping Charges:</h6>
         <h6 style={{ textAlign: "right" }}>
@@ -23,7 +25,8 @@ export default function Total() {
             ? "Free Shipping"
             : "Extra Rs 100 for shipping"}
         </h6>
-      </div>{" "}
+      </div>
+
       <div
         style={{
           display: "flex",
@@ -41,6 +44,7 @@ export default function Total() {
             : totalSubtotal + 100}
         </h2>
       </div>
+
       <div
         style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}
       >
